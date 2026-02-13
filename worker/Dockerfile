@@ -1,16 +1,12 @@
 FROM maven:3.5-jdk-8-alpine AS build
 
 WORKDIR /code
-
 COPY . .
+RUN mvn clean package -DskipTests
 
-RUN mvn package -DskipTests
-
-
-FROM eclipse-temurin:8-jre-alpine AS run
+FROM eclipse-temurin:8-jre-alpine
 
 WORKDIR /app
+COPY --from=build /code/target/*jar-with-dependencies.jar worker.jar
 
-COPY --from=build /code/target/*.jar worker.jar
-
-CMD ["java", "-jar", "worker.jar"]
+CMD ["java","-jar","worker.jar"]
